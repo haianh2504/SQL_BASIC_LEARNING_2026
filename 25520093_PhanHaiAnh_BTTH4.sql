@@ -380,32 +380,63 @@ UPDATE GIAOVIEN SET MUCLUONG = MUCLUONG + 0.2*MUCLUONG WHERE MAGV IN (
 
 -- Câu 2. Cập nhật giá trị điểm trung bình tất cả các môn học (DIEMTB) của mỗi học viên (tất cả các môn học
 -- đều có hệ số 1 và nếu học viên thi một môn nhiều lần, chỉ lấy điểm của lần thi sau cùng).
+
+
+
 -- Câu 3. Cập nhật giá trị cho cột GHICHU là “Cam thi” đối với trường hợp: học viên có một môn bất kỳ thi lần
 -- thứ 3 dưới 5 điểm.
+UPDATE HOCVIEN SET GHICHU = 'Cam thi' WHERE MAHV IN (
+	SELECT MAHV FROM KETQUATHI WHERE LANTHI = 3 AND DIEM < 5
+);
+
+
 -- Câu 4. Cập nhật giá trị cho cột XEPLOAI trong quan hệ HOCVIEN như sau:
 -- o Nếu DIEMTB  9 thì XEPLOAI =”XS”
 -- o Nếu 8  DIEMTB < 9 thì XEPLOAI = “G”
 -- o Nếu 6.5  DIEMTB < 8 thì XEPLOAI = “K”
 -- o Nếu 5  DIEMTB < 6.5 thì XEPLOAI = “TB”
 -- o Nếu DIEMTB < 5 thì XEPLOAI = ”Y”
+UPDATE HOCVIEN SET XEPLOAI = (
+	CASE 
+	WHEN DIEMTB >= 9 THEN 'XS'
+	WHEN DIEMTB >= 8 AND DIEMTB < 9 THEN 'G'
+	WHEN DIEMTB >= 6.5 AND DIEMTB < 8 THEN 'K'
+	WHEN DIEMTB >= 5 AND DIEMTB < 6.5 THEN 'TB'
+	ELSE 'Y'
+	END
+);
+
 -- III. Ngôn ngữ truy vấn dữ liệu:
+
 -- Câu 1. In ra danh sách (mã học viên, họ tên, ngày sinh, mã lớp) lớp trưởng của các lớp.
+SELECT DISTINCT MAHV, CONCAT(HO,' ',TEN) AS HoTen, NGSINH, MALOP FROM HOCVIEN WHERE MAHV IN (
+	SELECT TRGLOP FROM LOP
+);
+
 -- Câu 2. In ra bảng điểm khi thi (mã học viên, họ tên , lần thi, điểm số) môn CTRR của lớp “K12”, sắp xếp theo
 -- tên, họ học viên.
+SELECT kqt.MAHV, CONCAT(HO,' ',TEN) AS HoTen, kqt.LANTHI, kqt.DIEM FROM KETQUATHI kqt
+INNER JOIN MONHOC mh ON kqt.MAMH = mh.MAMH
+INNER JOIN HOCVIEN hv ON kqt.MAHV = hv.MAHV
+INNER JOIN LOP l ON hv.MALOP = l.MALOP
+WHERE TENMH = 'CTRR' AND TENLOP = 'K12' ORDER BY TEN, HO;
+
 -- Câu 3. In ra danh sách những học viên (mã học viên, họ tên) và những môn học mà học viên đó thi lần thứ
 -- nhất đã đạt.
+
 -- Câu 4. In ra danh sách học viên (mã học viên, họ tên) của lớp “K11” thi môn CTRR không đạt (ở lần thi 1).
+
 -- Câu 5. * Danh sách học viên (mã học viên, họ tên) của lớp “K” thi môn CTRR không đạt (ở tất cả các lần thi).
+
 -- Câu 6. Tìm tên những môn học mà giáo viên có tên “Tran Tam Thanh” dạy trong học kỳ 1 năm 2006.
--- Trang 9
--- KHOA HỆ THỐNG THÔNG TIN
--- BÀI TẬP THỰC HÀNH TUẦN 4
--- MÔN HỌC: IT004 - CƠ SỞ DỮ LIỆU
--- Hướng dẫn thực hành: Lê Võ Đình Kha
 
 -- Câu 7. Tìm những môn học (mã môn học, tên môn học) mà giáo viên chủ nhiệm lớp “K11” dạy trong học kỳ 1
 -- năm 2006.
+
+
 -- Câu 8. Tìm họ tên lớp trưởng của các lớp mà giáo viên có tên “Nguyen To Lan” dạy môn “Co So Du Lieu”.
+
+
 -- Câu 9. In ra danh sách những môn học (mã môn học, tên môn học) phải học liền trước môn “Co So Du Lieu”.
 -- Câu 10. Môn “Cau Truc Roi Rac” là môn bắt buộc phải học liền trước những môn học (mã môn học, tên môn
 -- học) nào.
