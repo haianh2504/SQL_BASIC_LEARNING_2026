@@ -423,16 +423,47 @@ WHERE TENMH = 'CTRR' AND TENLOP = 'K12' ORDER BY TEN, HO;
 
 -- Câu 3. In ra danh sách những học viên (mã học viên, họ tên) và những môn học mà học viên đó thi lần thứ
 -- nhất đã đạt.
+SELECT kqt.MaHV, CONCAT(hv.HO,' ',hv.TEN) AS HoTen, kqt.MaMH FROM KETQUATHI AS kqt
+INNER JOIN HOCVIEN AS hv ON kqt.MaHV = hv.MaHV
+WHERE kqt.LANTHI = 1 AND kqt.KQUA = 'đạt';
 
 -- Câu 4. In ra danh sách học viên (mã học viên, họ tên) của lớp “K11” thi môn CTRR không đạt (ở lần thi 1).
+SELECT DISTINCT hv.MaHV, CONCAT(hv.HO,' ',hv.TEN) AS HoTen FROM HOCVIEN as hv
+WHERE hv.MALOP = 'K11' AND EXISTS(
+	SELECT 1 FROM KETQUATHI as kqt
+	INNER JOIN MONHOC AS mh ON kqt.MAMH = mh.MAMH
+	WHERE hv.MAHV = kqt.MAHV AND mh.TENMH = 'CTRR' AND kqt.LANTHI = 1 AND kqt.KQUA = 'không đạt'
+);
 
 -- Câu 5. * Danh sách học viên (mã học viên, họ tên) của lớp “K” thi môn CTRR không đạt (ở tất cả các lần thi).
+SELECT DISTINCT hv.MAHV, CONCAT(hv.HO,' ',hv.TEN) AS HoTen FROM HOCVIEN as hv
+INNER JOIN LOP AS l ON hv.MALOP = l.MALOP
+WHERE l.TENLOP LIKE '%K' AND EXISTS(
+	SELECT 1 FROM KETQUATHI AS kqt
+	INNER JOIN MONHOC AS mh ON kqt.MAMH = mh.MAMH
+	WHERE kqt.MAHV = hv.MAHV AND mh.TENMH = 'CTRR'
+) AND NOT EXISTS(
+	SELECT 1 FROM KETQUATHI AS kqt
+	INNER JOIN MONHOC AS mh ON kqt.MAMH = mh.MAMH
+	WHERE kqt.MAHV = hv.MAHV AND mh.TENMH = 'CTRR' AND kqt.KQUA <> 'Không đạt'
+);
 
 -- Câu 6. Tìm tên những môn học mà giáo viên có tên “Tran Tam Thanh” dạy trong học kỳ 1 năm 2006.
+SELECT DISTINCT mh.TENMH FROM MONHOC AS mh
+WHERE EXISTS(
+	SELECT 1 FROM GIANGDAY AS gd
+	INNER JOIN GIAOVIEN AS gv ON gd.MAGV = gv.MAGV
+	WHERE mh.MAMH = gd.MAMH AND gv.HOTEN = 'Tran Tam Thanh' AND gd.HOCKY = 1 AND gd.NAM = 2006
+);
 
 -- Câu 7. Tìm những môn học (mã môn học, tên môn học) mà giáo viên chủ nhiệm lớp “K11” dạy trong học kỳ 1
 -- năm 2006.
-
+SELECT mh.MAMH, mh.TENMH FROM MONHOC AS mh
+WHERE EXISTS(
+	SELECT 1 FROM GIANGDAY AS gd
+	INNER JOIN LOP AS l ON gd.MAGV = l.MAGVCN
+	WHERE mh.MAMH = gd.MAMH AND gd.HOCKY = 1 AND gd.NAM = 2006
+);
 
 -- Câu 8. Tìm họ tên lớp trưởng của các lớp mà giáo viên có tên “Nguyen To Lan” dạy môn “Co So Du Lieu”.
 
