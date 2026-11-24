@@ -39,7 +39,15 @@ GROUP BY lv.MaLV, lv.HangGhe;
 
 -- e Tìm mã và tên của khách hàng thành viên đã thanh toán đặt vé và đã đặt tất cả các loại vé
 -- của lịch bay có mã “VN101-080125” trong lần đặt vé đó
-
+SELECT dv.MaTV, CONCAT(tv.HoTV, ' ', tv.TenTV) AS HoTen FROM DATVE AS dv
+INNER JOIN THANHVIEN AS tv ON dv.MaTV = tv.MaTV
+WHERE dv.MaLB = 'VN101-080125' AND dv.TTDatVe = 'Đã thanh toán' AND NOT EXISTS(
+    SELECT 1 FROM LOAIVE AS lv
+    WHERE lv.MaLB = dv.MaLB AND NOT EXISTS(
+        SELECT 1 FROM CTDV AS ctdv
+        WHERE ctdv.MaDV = dv.MaDV AND ctdv.MaLV = lv.MaLV
+    )
+);
 
 -- f Trong các chuyến bay khởi hành từ sân bay có mã “SGN” trong năm 2025, tìm các lịch bay
 -- đã được đặt hết vé. Thông tin hiển thị: Số hiệu chuyến bay, mã lịch bay, thời gian khởi hành.
