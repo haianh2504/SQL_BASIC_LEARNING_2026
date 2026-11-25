@@ -11,7 +11,7 @@ INNER JOIN SANBAY AS sb ON cb.SBDI = sb.MaSB
 WHERE sb.TenSB = 'Tân Sơn Nhất' AND EXISTS(
     SELECT 1 FROM LICHBAY AS lb
     WHERE lb.SoHieuCB = cb.SoHieuCB AND GioDi = '10:30:00-2024-12-20'
-);
+)
 
 
 -- c Cho biết mã đặt vé, mã lịch bay, mã khách hàng thành viên của các lượt đặt vé có tình trạng
